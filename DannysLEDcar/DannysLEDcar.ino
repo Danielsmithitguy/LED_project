@@ -126,7 +126,9 @@ uint32_t colorPick(int x) {
       break;
   }
 }
-
+//this is where I think the problem is, for some reason I can't get it to return ture on an if check but the 
+//Serial.Print on line 66 will print 1.
+//x is for current reading, y is for previouse reading, to be refactored at a later time.
 bool pressCheck(int x, int y) {
   if (x == y and x != 0 and time == 0) {
     time = millis();
