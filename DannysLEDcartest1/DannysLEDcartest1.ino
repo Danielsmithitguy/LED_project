@@ -66,31 +66,6 @@ void loop() {
   }
 }
 
-/*void checkToggle() {
-  bool reading = digitalRead(togglePinIn);
-  if (pressCheck(reading, previous)) {
-    currentColor = 0;
-  }
-  // Check if state changed from high to low (button press).
-  if(reading == LOW && previous == HIGH) {
-    // Short delay to debounce button.
-    delay(20);
-    // Check if button is still low after debounce.
-    reading = digitalRead(togglePinIn);
-    if (reading == LOW && pressCheck(reading, previous)) {
-      currentColor++;
-      if (currentColor > numberOfColors){
-      currentColor = 0;
-      }
-    } else if(reading == LOW && !pressCheck(reading, previous)) {
-      currentColor = 0;
-    }
-  }
-  // Set the last button state to the old state.
-  previous = reading;
-}
-*/
-
 void checkToggle(){
   bool reading = digitalRead(togglePinIn);
   //Serial.print("pressCheck | " + String(pressCheck(reading, previous)) + "\n");
@@ -110,18 +85,6 @@ void checkToggle(){
   if (currentColor > numberOfColors){
     currentColor = 1;
   }
-  
-  
-  
-  /*if(pressCheck(reading, previous) == 1) {
-    currentColor = 0;
-  } else if (pressCheck(reading, previous) == 2) {
-    currentColor++;
-  }
-  if (currentColor > numberOfColors){
-    currentColor = 0;
-  }
-  */
   previous = reading;
 }
 
@@ -140,6 +103,19 @@ uint32_t colorPick(int x) {
     case 5: return colorPick(2);
   }
 }
+
+uint32_t effectsPick(int currentEffect) {
+  int previousEffect;
+  if (currentEffect != previousEffect) {
+    switch (currentEffect) {
+      case 1:
+    
+      break;
+    } 
+  }
+  previousEffect == currentEffect;
+}
+
 
 int pressCheck(int reading, int previous){
   //long time;
@@ -167,56 +143,7 @@ int pressCheck(int reading, int previous){
   } else {
     return 4;
   }
-
-  /*
-  if (!buttonHold(time,0)) {
-    buttonState = 1;
-  } else if (buttonHold(time,2000)){
-    buttonState = 2;
-  } else {
-    buttonState = 0;
-  }
-  if (reading != previous) {
-    time = 0;
-  }
-  if (previous == 1 && reading == 0) {
-    //Serial.print("im returning \n");
-    return buttonState;
-  } else {
-    return 4;
-  }
-  */
 }
-
-
-//this is where I think the problem is, for some reason I can't get it to return ture on an if check but the 
-//Serial.Print on line 66 will print 1.
-//x is for current reading, y is for previouse reading, to be refactored at a later time.
-/*bool pressCheck(int x, int y) {
-  if (x == y and x != 0 and time == 0) {
-    time = millis();
-    //Serial.print(time);
-  }
-  //Serial.print(time);
-  Serial.print("time : " + String(time) + " | " + "millis :" + String(millis()) + "\n");
-  if (buttonHold(time,200)) {
-    time = 0;
-    return true;
-  }
-  if (x != y) { 
-    if (time != 0 and (time + 1000) < millis()) {
-      //Serial.print("\n before: current color | " + String(currentColor));
-      //currentColor = numberOfColors;
-      //Serial.print("\n After: current color | " + String(currentColor));
-      //delay(20);
-      //time = 0;
-      //return true;
-    }
-    time = 0;
-  }
-  return false;
-}
-*/
 
 void colorWipe(uint32_t c, uint8_t wait) {
   for(int i=0; i<leftMax; i++) {
