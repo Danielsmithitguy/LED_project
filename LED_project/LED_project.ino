@@ -45,8 +45,6 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(togglePinIn, INPUT_PULLUP);
-  //setting Group ranges
-  //globalGroup[1] = [startOfGroupOne, endOfGroupOne]
 
   stripLeft.begin();
   stripLeft.show();
@@ -62,29 +60,9 @@ void setup() {
 void loop() {
 
   buttonInput();
-  //setGroup(groupArray);
-
 
   stripLeft.show();
   stripRight.show();
-  /*
-  if (currentColor == 5) {
-    colorWipe(colorPick(currentColor),10);
-  }
-  else {
-  
-    for (int i = 0; i < leftMax; i++) {
-      stripLeft.setPixelColor(i, colorPick(currentColor));
-    }
-    for (int i = 0; i < rightMax; i++) {
-      stripRight.setPixelColor(i, colorPick(currentColor));
-    }
-    stripLeft.setBrightness(brightness);
-    stripRight.setBrightness(brightness);
-    stripLeft.show();
-    stripRight.show();
-  }
-  */
 }
 
 //group flag will return 76 and 82, not sure why even tho it's pulling the correct start and end values for the array index based on group, why?
@@ -162,6 +140,7 @@ void effectsPick(bool refresh) {
   switch (currentEffect) {
     case 0:
       if (!refresh) {
+
         masterArray[0][0] = groupOne[0];
         masterArray[0][1] = groupOne[1];
         masterArray[0][2] = groupOne[2];
@@ -249,20 +228,5 @@ int setColor(int currentButtonState) {
   
   return currentColor;
 }
-/*
-  void setPixle(group) {
-  for (int outterGroupCount = 0; outterGroupCount < = numberOfGroups; outterGroupCount++)
-  {
-    int currentGroup[] = group[outterGroupCount];
-    for(int innerGroupCount = currentGroup[1]; innerGroupCount <= currentGroup[2]; innerGroupCount++)
-    {
-        strip.setPixelColor(innerGroupCount, color);
-          if(innerGroupCount < maxLeftStrip)
-          {
-            strip2.setPixelColor(innerGroupCount, color);
-          }
-    }
-  }
-  }
-*/
+
 
