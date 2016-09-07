@@ -8,7 +8,6 @@ int brightness = 225;
 //36
 int leftMax = 36;
 int rightMax = 36;
-  int currentEffect;
 //bool toggle = false;
 //toggle settings
 
@@ -17,6 +16,7 @@ long time = 0;
 long debounce = 200;
 int currentColor = 1;
 int numberOfColors = 4;
+int maxEffects = 2;
 
 int groupOne[3] = {0,leftMax, 'L'};
 int groupTwo[3] = {0,rightMax, 'R'};
@@ -40,8 +40,11 @@ int masterArray[2][4];
 
 int previousEffect;
 
+int colorSave;
+
 int currentWipeIndex;
 int colorWipeDelay = 200;
+int colorWipeDelaySingle = 70;
 
 void setup() {
 
@@ -64,7 +67,7 @@ void loop() {
 
   buttonInput();
 
-  if (currentEffect == 1); {
+  if (currentEffect == 1 || currentEffect == 2); {
     effectsPick(true);
   }
   stripLeft.show();
@@ -103,7 +106,7 @@ void buttonInput(){
   bool reading = digitalRead(togglePinIn);
   int returnedButtonState = pressCheck(reading, previous);
   if (returnedButtonState != 4)
-    Serial.print(String(returnedButtonState) + "\n");
+    //Serial.print(String(returnedButtonState) + "\n");
   //runs once returnedButtonState returns a change
   if (returnedButtonState != 4 && returnedButtonState != 2) {
    currentColor = setColor(returnedButtonState);
@@ -144,7 +147,7 @@ void effectsPick(bool refresh) {
   currentEffect++;
   }
 
-  if (currentEffect > 1){
+  if (currentEffect > maxEffects){
     currentEffect = 0;
   }
 
@@ -176,6 +179,32 @@ void effectsPick(bool refresh) {
           setColor(1);
         }
         delay(colorWipeDelay);
+      }
+    break;
+    case 2:
+      Serial.print("currentWipeIndex |" + String(currentWipeIndex) + "\n"); 
+      if (!refresh) {
+        currentWipeIndex = 0;
+        currentColor = 1;
+      } else {
+        setPixle(currentWipeIndex, 'B');
+        if (currentWipeIndex != 0) {
+          colorSave = currentColor;
+          currentColor = 0;
+          setPixle(currentWipeIndex-1, 'B');
+          currentColor = colorSave;
+        } else {
+          colorSave = currentColor;
+          currentColor = 0;
+          setPixle(leftMax, 'B');
+          currentColor = colorSave;
+        }
+        currentWipeIndex++;
+        if (currentWipeIndex > leftMax){
+          currentWipeIndex = 0;
+          //setColor(1);
+        }
+        delay(colorWipeDelaySingle);
       }
     break;
   } 
