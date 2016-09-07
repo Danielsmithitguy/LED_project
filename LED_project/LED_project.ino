@@ -13,7 +13,7 @@ int rightMax = 36;
 int previous;
 long time = 0;
 long debounce = 200;
-int currentColor = 0;
+int currentColor = 1;
 int numberOfColors = 4;
 
 
@@ -28,6 +28,8 @@ uint32_t color;
 //const int numOfGroups = 4;
 //const int globalGroup[numOfGroups];
 
+  int testArray[2] = {0, leftMax};
+  int groupArray[2][3];
 
 
 void setup() {
@@ -43,11 +45,24 @@ void setup() {
 
   stripRight.begin();
   stripRight.show();
+
+  groupArray[0][0] = testArray[0];
+  groupArray[0][1] = testArray[1];
+  groupArray[0][2] = 0;
+  groupArray[1][0] = testArray[0];
+  groupArray[1][1] = testArray[1];
+  groupArray[1][2] = 0;
 }
 
 void loop() {
 
   buttonInput();
+  setPixle(groupArray);
+
+
+  stripLeft.show();
+  stripRight.show();
+  /*
   if (currentColor == 5) {
     colorWipe(colorPick(currentColor),10);
   }
@@ -64,14 +79,39 @@ void loop() {
     stripLeft.show();
     stripRight.show();
   }
+  */
+}
+
+int setPixle(int groupArray[3][3]) {
+  for(int group = 0; group <= 1; group++){
+    int currentPixleGroupStart = groupArray[group][0];
+    int currentPixleGroupEnd = groupArray[group][1];
+    //Serial.print("current Group " + String(group) + " | current group flag " + String(groupArray[group][2]) + " | currentPixleGroupStart " + String(currentPixleGroupStart) + " | currentPixleGroupEnd " + String(currentPixleGroupEnd) + "\n");
+    Serial.print("currentColor | " + String(currentColor) + "\n");
+    for(int x = currentPixleGroupStart; x <= currentPixleGroupEnd ; x++) {
+      if (groupArray[group][2] == 1) {
+        setPixle(x); 
+        Serial.print(String(x) + "\n");   
+      }
+    }
+    groupArray[group][2] = 0;
+  }
+}
+
+void setPixle(int pixelIndex) {
+  stripLeft.setPixelColor(pixelIndex, colorPick(currentColor));
 }
 
 void buttonInput(){
   bool reading = digitalRead(togglePinIn);
   int returnedButtonState = pressCheck(reading, previous);
-  
-  if (returnedButtonState != 4) {
+
+  //runs once returnedButtonState returns a change
+  if (returnedButtonState != 4 && returnedButtonState != 2) {
    currentColor = setColor(returnedButtonState);
+   effectsPick(true);
+  } else if (returnedButtonState == 2) {
+   effectsPick(false);
   }
   
   previous = reading;
@@ -93,29 +133,34 @@ uint32_t colorPick(int x) {
   }
 }
 
-uint32_t effectsPick(int currentEffect) {
-  int previousEffect;
-  if (currentEffect != previousEffect) {
-    switch (currentEffect) {
-      case 1:
-    
-      break;
-    } 
+void effectsPick(bool refresh) {
+  int currentEffect;
+  Serial.print("currentEffect | " + String(currentEffect) + "\n");
+  if (!refresh) {
+  currentEffect++;
   }
-  previousEffect == currentEffect;
+  switch (currentEffect) {
+    case 0:
+      groupArray[0][2] = 1;
+      groupArray[1][2] = 1;
+    break;
+  } 
+  if (currentEffect > 1){
+    currentEffect = 0;
+  }
+  currentEffect = currentEffect;
 }
 
-//pressCheck will return what state the button is in based on how long it's been held down continusly, and break will reset the trimmer and return the current value it's on.
+//pressCheck will return what state the button is in based on how long it's been held down continusly, any break will reset the trimmer and return the current value it's on.
 //-would like to find away to refactor the time logic-
 int pressCheck(int reading, int previous){
-  //long time;
   int buttonState;
   uint32_t test = buttonHold(time,2000);
-  //Serial.print("time | " + String(time) + " : mills | " + String(millis()) + "\n");
-  //Serial.print("Current Reading | " + String(reading) + " : Previous Reading | " + String(previous) + "\n");
+
   if (reading == previous && previous != 0 && time == 0) {
     time = millis();
   }
+  
   if (time != 0 && (time + 1000) > millis()) {
     buttonState = 1;
   } 
@@ -127,8 +172,9 @@ int pressCheck(int reading, int previous){
   if (reading != previous) {
     time = 0;
   }
+
+  //check to ensure that buttonstate changed before returning a value
   if (previous == 1 && reading == 0) {
-    //Serial.print("im returning \n");
     return buttonState;
   } else {
     return 4;
