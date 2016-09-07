@@ -5,8 +5,10 @@
 #define togglePinIn 15
 
 int brightness = 225;
+//36
 int leftMax = 36;
 int rightMax = 36;
+  int currentEffect;
 //bool toggle = false;
 //toggle settings
 
@@ -15,6 +17,9 @@ long time = 0;
 long debounce = 200;
 int currentColor = 1;
 int numberOfColors = 4;
+
+int groupOne[3] = {0,leftMax, 'L'};
+int groupTwo[3] = {0,rightMax, 'R'};
 
 
 Adafruit_NeoPixel stripLeft = Adafruit_NeoPixel(leftMax, neoPinLeft, NEO_RGB);
@@ -31,6 +36,9 @@ uint32_t color;
   int testArray[2] = {0, leftMax};
   int groupArray[2][3];
 
+int masterArray[2][4];
+
+int previousEffect;
 
 void setup() {
 
@@ -46,18 +54,15 @@ void setup() {
   stripRight.begin();
   stripRight.show();
 
-  groupArray[0][0] = testArray[0];
-  groupArray[0][1] = testArray[1];
-  groupArray[0][2] = 0;
-  groupArray[1][0] = testArray[0];
-  groupArray[1][1] = testArray[1];
-  groupArray[1][2] = 0;
+  //force a state for init
+  currentEffect = 2;
+  effectsPick(false);
 }
 
 void loop() {
 
   buttonInput();
-  setPixle(groupArray);
+  //setGroup(groupArray);
 
 
   stripLeft.show();
@@ -82,24 +87,32 @@ void loop() {
   */
 }
 
-int setPixle(int groupArray[3][3]) {
+//group flag will return 76 and 82, not sure why even tho it's pulling the correct start and end values for the array index based on group, why?
+int setGroup(int groupArray[2][4]) {
   for(int group = 0; group <= 1; group++){
     int currentPixleGroupStart = groupArray[group][0];
     int currentPixleGroupEnd = groupArray[group][1];
-    //Serial.print("current Group " + String(group) + " | current group flag " + String(groupArray[group][2]) + " | currentPixleGroupStart " + String(currentPixleGroupStart) + " | currentPixleGroupEnd " + String(currentPixleGroupEnd) + "\n");
-    Serial.print("currentColor | " + String(currentColor) + "\n");
+    int currentPixleSide = groupArray[group][2];
+    //Serial.print("current Group " + String(group) + " | current group flag " + String(groupArray[group][3]) + " | currentPixleGroupStart " + String(currentPixleGroupStart) + " | currentPixleGroupEnd " + String(currentPixleGroupEnd) + " | currentPixleSide " + String(currentPixleSide) +"\n");
+    //Serial.print("currentColor | " + String(currentColor) + "\n");
     for(int x = currentPixleGroupStart; x <= currentPixleGroupEnd ; x++) {
-      if (groupArray[group][2] == 1) {
-        setPixle(x); 
-        Serial.print(String(x) + "\n");   
+      if (groupArray[group][3] == 1) {
+        setPixle(x, currentPixleSide); 
+        //Serial.print(String(x) + "\n");   
       }
     }
-    groupArray[group][2] = 0;
+    //groupArray[group][2] = 0;
   }
 }
 
-void setPixle(int pixelIndex) {
-  stripLeft.setPixelColor(pixelIndex, colorPick(currentColor));
+void setPixle(int pixelIndex, char side) {
+  if (side == 'L')
+    stripLeft.setPixelColor(pixelIndex, colorPick(currentColor));
+  if (side == 'R')
+    stripRight.setPixelColor(pixelIndex, colorPick(currentColor));
+  if (side == 'B')
+    stripLeft.setPixelColor(pixelIndex, colorPick(currentColor));
+    stripRight.setPixelColor(pixelIndex, colorPick(currentColor));
 }
 
 void buttonInput(){
@@ -134,21 +147,51 @@ uint32_t colorPick(int x) {
 }
 
 void effectsPick(bool refresh) {
-  int currentEffect;
-  Serial.print("currentEffect | " + String(currentEffect) + "\n");
+  Serial.print("refresh | " + String(refresh) + "\n");                                              
+  Serial.print("currentEffectStart | " + String(currentEffect) + "\n");
+  Serial.print("previouseEffect | " + String(previousEffect) + "\n");
   if (!refresh) {
+  clearStrip();
   currentEffect++;
   }
-  switch (currentEffect) {
-    case 0:
-      groupArray[0][2] = 1;
-      groupArray[1][2] = 1;
-    break;
-  } 
+
   if (currentEffect > 1){
     currentEffect = 0;
   }
-  currentEffect = currentEffect;
+
+  switch (currentEffect) {
+    case 0:
+      if (!refresh) {
+        masterArray[0][0] = groupOne[0];
+        masterArray[0][1] = groupOne[1];
+        masterArray[0][2] = groupOne[2];
+        masterArray[0][3] = 1;
+
+        masterArray[1][0] = groupTwo[0];
+        masterArray[1][1] = groupTwo[1];
+        masterArray[1][2] = groupTwo[2];
+        masterArray[1][3] = 1;
+      }
+      setGroup(masterArray);
+    break;
+    case 1:
+
+    break;
+  } 
+
+  Serial.print("currentEffectEnd | " + String(currentEffect) + "\n");
+  previousEffect = currentEffect;
+}
+
+void clearStrip() {
+  for(int x = 0; x < leftMax; x++){
+    stripLeft.setPixelColor(x, colorPick(0));
+  }
+  for(int x = 0; x < rightMax; x++){
+    stripRight.setPixelColor(x, colorPick(0));
+  }
+  stripLeft.show();
+  stripRight.show();
 }
 
 //pressCheck will return what state the button is in based on how long it's been held down continusly, any break will reset the trimmer and return the current value it's on.
@@ -180,17 +223,6 @@ int pressCheck(int reading, int previous){
     return 4;
   }
 }
-
-void colorWipe(uint32_t c, uint8_t wait) {
-  for(int i=0; i<leftMax; i++) {
-    stripRight.setPixelColor(i, c);
-    stripLeft.setPixelColor(i,c);
-    stripRight.show();
-    stripLeft.show();
-    delay(wait);
-  }
-}
-
 
 //no longer in use, minor refactor attempt for pressCheck
 bool buttonHold(int time, int pause){
