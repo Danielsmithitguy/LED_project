@@ -102,13 +102,18 @@ void setPixle(int pixelIndex, char side) {
 void buttonInput(){
   bool reading = digitalRead(togglePinIn);
   int returnedButtonState = pressCheck(reading, previous);
-
+  if (returnedButtonState != 4)
+    Serial.print(String(returnedButtonState) + "\n");
   //runs once returnedButtonState returns a change
   if (returnedButtonState != 4 && returnedButtonState != 2) {
    currentColor = setColor(returnedButtonState);
    effectsPick(true);
   } else if (returnedButtonState == 2) {
    effectsPick(false);
+  }
+  if (returnedButtonState == 0) { 
+    currentEffect = 0;
+    currentColor = 0;
   }
   
   previous = reading;
@@ -131,9 +136,9 @@ uint32_t colorPick(int x) {
 }
 
 void effectsPick(bool refresh) {
-  Serial.print("refresh | " + String(refresh) + "\n");                                              
-  Serial.print("currentEffectStart | " + String(currentEffect) + "\n");
-  Serial.print("previouseEffect | " + String(previousEffect) + "\n");
+  //Serial.print("refresh | " + String(refresh) + "\n");                                              
+  //Serial.print("currentEffectStart | " + String(currentEffect) + "\n");
+  //Serial.print("previouseEffect | " + String(previousEffect) + "\n");
   if (!refresh) {
   clearStrip();
   currentEffect++;
@@ -175,7 +180,7 @@ void effectsPick(bool refresh) {
     break;
   } 
 
-  Serial.print("currentEffectEnd | " + String(currentEffect) + "\n");
+  //Serial.print("currentEffectEnd | " + String(currentEffect) + "\n");
   previousEffect = currentEffect;
 }
 
@@ -194,7 +199,6 @@ void clearStrip() {
 //-would like to find away to refactor the time logic-
 int pressCheck(int reading, int previous){
   int buttonState;
-  uint32_t test = buttonHold(time,2000);
 
   if (reading == previous && previous != 0 && time == 0) {
     time = millis();
