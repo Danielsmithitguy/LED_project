@@ -33,12 +33,15 @@ uint32_t color;
 //const int numOfGroups = 4;
 //const int globalGroup[numOfGroups];
 
-  int testArray[2] = {0, leftMax};
-  int groupArray[2][3];
+int testArray[2] = {0, leftMax};
+int groupArray[2][3];
 
 int masterArray[2][4];
 
 int previousEffect;
+
+int currentWipeIndex;
+int colorWipeDelay = 200;
 
 void setup() {
 
@@ -61,6 +64,9 @@ void loop() {
 
   buttonInput();
 
+  if (currentEffect == 1); {
+    effectsPick(true);
+  }
   stripLeft.show();
   stripRight.show();
 }
@@ -153,8 +159,19 @@ void effectsPick(bool refresh) {
       }
       setGroup(masterArray);
     break;
-    case 1:
-
+    case 1:  
+      if (!refresh) {
+        currentWipeIndex = 0;
+        currentColor = 1;
+      } else {
+        setPixle(currentWipeIndex, 'B');
+        currentWipeIndex++;
+        if (currentWipeIndex > leftMax){
+          currentWipeIndex = 0;
+          setColor(1);
+        }
+        delay(colorWipeDelay);
+      }
     break;
   } 
 
