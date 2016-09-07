@@ -47,7 +47,7 @@ void setup() {
 
 void loop() {
 
-  checkToggle();
+  buttonInput();
   if (currentColor == 5) {
     colorWipe(colorPick(currentColor),10);
   }
@@ -66,25 +66,14 @@ void loop() {
   }
 }
 
-void checkToggle(){
+void buttonInput(){
   bool reading = digitalRead(togglePinIn);
-  //Serial.print("pressCheck | " + String(pressCheck(reading, previous)) + "\n");
-  int currentState = pressCheck(reading, previous);
-  //Serial.print("currentState | " + String(currentState) + "\n");
-  Serial.print("currentColor | " + String(currentColor) + "\n");
-  if (currentState != 4) {
-    switch(currentState) {
-      case 0: 
-        currentColor = 0;
-      break;
-      case 1:
-         currentColor++;
-      break;
-    }
+  int returnedButtonState = pressCheck(reading, previous);
+  
+  if (returnedButtonState != 4) {
+   currentColor = setColor(returnedButtonState);
   }
-  if (currentColor > numberOfColors){
-    currentColor = 1;
-  }
+  
   previous = reading;
 }
 
@@ -116,7 +105,8 @@ uint32_t effectsPick(int currentEffect) {
   previousEffect == currentEffect;
 }
 
-
+//pressCheck will return what state the button is in based on how long it's been held down continusly, and break will reset the trimmer and return the current value it's on.
+//-would like to find away to refactor the time logic-
 int pressCheck(int reading, int previous){
   //long time;
   int buttonState;
@@ -155,12 +145,31 @@ void colorWipe(uint32_t c, uint8_t wait) {
   }
 }
 
+
+//no longer in use, minor refactor attempt for pressCheck
 bool buttonHold(int time, int pause){
   if (time != 0 && (time + pause) > millis()){
     return true;
   } else {
     return false;    
   }
+}
+
+int setColor(int currentButtonState) {
+  switch(currentButtonState) {
+      case 0: 
+        currentColor = 0;
+      break;
+      case 1:
+         currentColor++;
+      break;
+    }
+
+  if (currentColor > numberOfColors){
+    currentColor = 1;
+  }
+  
+  return currentColor;
 }
 /*
   void setPixle(group) {
