@@ -39,6 +39,7 @@ int groupArray[2][3];
 int masterArray[2][4];
 
 int previousEffect;
+int currentEffect;
 
 int colorSave;
 
